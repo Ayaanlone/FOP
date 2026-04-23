@@ -1,0 +1,116 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+
+#define SIZE 6
+#define MINES 15
+
+char board[SIZE][SIZE]; // actual mine board
+char visible[SIZE][SIZE]; // what tthe  player  sees
+
+void initBoards() {
+  for (int i = 0; i < SIZE; i++) {
+    for (int j = 0; j < SIZE; j++) {
+      board[i][j] = '.';
+      visible[i][j] = '#';
+    }
+  }
+}
+
+void placeMines() {
+  int placed = 0;
+
+  while (placed < MINES) {
+    int r = rand() % SIZE;
+    int c = rand() % SIZE;
+
+    if (board[r][c] != '^') {
+      board[r][c] = '^';
+      placed++;
+    }
+  }
+}
+
+int countMines(int row, int col) {
+  int count = 0;
+
+  for (int i = -1; i <= 1; i++) {
+    for (int j = -1; j <= 1; j++) {
+      int r = row + i;
+      int c = col + j;
+
+      if (r >= 0 && r < SIZE && c >= 0 && c < SIZE) {
+        if (board[r][c] == '*')
+          count++;
+      }
+    }
+  }
+
+  return count;
+}
+
+void printBoard() {
+  printf("\n");
+
+  for (int i = 0; i < SIZE; i++) {
+    for (int j = 0; j < SIZE; j++) {
+      printf("%c ", visible[i][j]);
+    }
+    printf("\n");
+  }
+
+  printf("\n");
+}
+
+int main() {
+  int gameRunning = 1;
+
+  srand(time(NULL));
+
+  initBoards();
+  placeMines();
+
+  printf("minesweepr\n");
+  printf("Enter row and column (0-%d)\n", SIZE - 1);
+  int a = 0;
+  while (gameRunning) {
+    printBoard();
+
+    int row, col;
+
+    printf("Move: ");
+    scanf("%d %d", & row, & col);
+
+    if (row < 0 || row >= SIZE || col < 0 || col >= SIZE) {
+      printf("out of bounds\n");
+      continue;
+    }
+
+    if (board[row][col] == '*') {
+      printf("better luck next time!\n");
+
+      for (int i = 0; i < SIZE; i++)
+        for (int j = 0; j < SIZE; j++)
+          if (board[i][j] == '*')
+            visible[i][j] = '*';
+
+      printBoard();
+
+      gameRunning = 0;
+    } else {
+      if (visible[row][col] == '#') {
+        a = a + 1;
+        int num = countMines(row, col);
+        visible[row][col] = num + '0';
+        if (a == (SIZE * SIZE) - MINES) {
+          printf("░██╗░░░░░░░██╗██╗███╗░░██╗\n░██║░░██╗░░██║██║████╗░██║\n░╚██╗████╗██╔╝██║██╔██╗██║\n░░████╔═████║░██║██║╚████║\n░░╚██╔╝░╚██╔╝░██║██║░╚███║\n░░░╚═╝░░░╚═╝░░╚═╝╚═╝░░╚══╝");
+          return 0;
+        }
+
+      } else {
+        printf("Repeated move!, PLease try again!");
+      }
+
+    }
+  }
+}
